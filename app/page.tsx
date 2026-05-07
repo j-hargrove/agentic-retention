@@ -43,7 +43,7 @@ export default function Home() {
   const [running, setRunning] = useState(false)
   const [status, setStatus] = useState("idle")
 
-  const [budget, setBudget] = useState(500)
+  const [budget] = useState(500)
   const [spent, setSpent] = useState(0)
 
   const [narrative, setNarrative] = useState("")
@@ -58,14 +58,21 @@ export default function Home() {
   const COST = {
     email: 1,
     tooltip: 0,
-    incentive: 20
+    incentive: 5
   }
 
   const run = () => {
     if (day >= 30) {
-  setRunning(false)
-  setStatus("simulation complete")
-  return
+      setRunning(false)
+      setStatus("simulation complete")
+      return
+    }
+
+    if (spent > budget) {
+      setRunning(false)
+      setStatus("budget limit reached")
+      return
+    }
 
     setStatus("thinking")
 
@@ -102,11 +109,13 @@ export default function Home() {
             decision.selected as keyof typeof COST
           ]
 
-        if (outcome === "reengaged")
+        if (outcome === "reengaged") {
           revenue += VALUE.reengaged
+        }
 
-        if (outcome === "converted")
+        if (outcome === "converted") {
           revenue += VALUE.converted
+        }
 
         actionMix[
           decision.selected as keyof typeof actionMix
@@ -214,7 +223,7 @@ export default function Home() {
           : "tooltips"
 
       setNarrative(
-        `Agent prioritizing ${dominant} as higher-performing intervention while managing budget efficiency.`
+        `Agent prioritizing ${dominant} as higher-performing intervention while balancing budget efficiency.`
       )
 
       setStatus("learning")
@@ -232,13 +241,15 @@ export default function Home() {
         run()
       }, 1200)
     } else {
-      if (intervalRef.current)
+      if (intervalRef.current) {
         clearInterval(intervalRef.current)
+      }
     }
 
     return () => {
-      if (intervalRef.current)
+      if (intervalRef.current) {
         clearInterval(intervalRef.current)
+      }
     }
   }, [running, users])
 
@@ -271,34 +282,34 @@ export default function Home() {
     <div className="min-h-screen bg-black text-white p-8 space-y-6">
 
       {/* HEADER */}
-      <div className="flex justify-between">
+      <div className="flex justify-between items-start">
 
         <div>
-          <h1 className="text-2xl font-semibold">
+          <h1 className="text-3xl font-semibold tracking-tight">
             Retention Control Room
           </h1>
 
-          <div className="text-xs text-gray-400 mt-1 max-w-xl">
+          <div className="text-sm text-gray-400 mt-2 max-w-2xl">
             {narrative}
           </div>
         </div>
 
         <div className="flex gap-4 items-center text-sm">
 
-          <div>
+          <div className="bg-gray-900 border border-gray-800 rounded px-3 py-2">
             Day {day}
           </div>
 
-          <div>
+          <div className="bg-gray-900 border border-gray-800 rounded px-3 py-2">
             Status:
-            <span className="text-green-400 ml-1">
+            <span className="text-green-400 ml-2">
               {status}
             </span>
           </div>
 
-          <div>
+          <div className="bg-gray-900 border border-gray-800 rounded px-3 py-2">
             Budget:
-            <span className="ml-1">
+            <span className="ml-2">
               ${spent} / ${budget}
             </span>
           </div>
@@ -308,7 +319,7 @@ export default function Home() {
               onClick={() => setRunning(true)}
               className="bg-green-600 hover:bg-green-500 transition px-4 py-2 rounded"
             >
-              Start
+              Start Simulation
             </button>
           ) : (
             <button
@@ -318,49 +329,50 @@ export default function Home() {
               Stop
             </button>
           )}
+
         </div>
 
       </div>
 
-      {/* EXECUTIVE METRICS */}
+      {/* METRICS */}
       <div className="grid grid-cols-4 gap-4">
 
-        <div className="bg-gray-900 rounded p-4 border border-gray-800">
-          <div className="text-xs text-gray-500">
+        <div className="bg-gray-900 rounded border border-gray-800 p-5">
+          <div className="text-xs text-gray-500 uppercase tracking-wide">
             Revenue Impact
           </div>
 
-          <div className="text-2xl font-semibold mt-1">
+          <div className="text-3xl font-semibold mt-3">
             ${latest?.revenue || 0}
           </div>
         </div>
 
-        <div className="bg-gray-900 rounded p-4 border border-gray-800">
-          <div className="text-xs text-gray-500">
+        <div className="bg-gray-900 rounded border border-gray-800 p-5">
+          <div className="text-xs text-gray-500 uppercase tracking-wide">
             Activated Users
           </div>
 
-          <div className="text-2xl font-semibold mt-1">
+          <div className="text-3xl font-semibold mt-3">
             {latest?.activated || 0}
           </div>
         </div>
 
-        <div className="bg-gray-900 rounded p-4 border border-gray-800">
-          <div className="text-xs text-gray-500">
+        <div className="bg-gray-900 rounded border border-gray-800 p-5">
+          <div className="text-xs text-gray-500 uppercase tracking-wide">
             Lift vs Baseline
           </div>
 
-          <div className="text-2xl font-semibold mt-1 text-green-400">
+          <div className="text-3xl font-semibold mt-3 text-green-400">
             {lift}%
           </div>
         </div>
 
-        <div className="bg-gray-900 rounded p-4 border border-gray-800">
-          <div className="text-xs text-gray-500">
+        <div className="bg-gray-900 rounded border border-gray-800 p-5">
+          <div className="text-xs text-gray-500 uppercase tracking-wide">
             Baseline Activation
           </div>
 
-          <div className="text-2xl font-semibold mt-1">
+          <div className="text-3xl font-semibold mt-3">
             {latest?.baseline || 0}
           </div>
         </div>
@@ -370,58 +382,58 @@ export default function Home() {
       {/* RISK DISTRIBUTION */}
       <div className="grid grid-cols-3 gap-4">
 
-        <div className="bg-gray-900 p-4 rounded border border-green-500/20">
-          <div className="text-xs text-gray-500">
+        <div className="bg-gray-900 border border-green-500/20 rounded p-5">
+          <div className="text-xs text-gray-500 uppercase tracking-wide">
             Low Risk Users
           </div>
 
-          <div className="text-3xl font-semibold text-green-400 mt-2">
+          <div className="text-4xl font-semibold text-green-400 mt-3">
             {lowRisk}
           </div>
 
-          <div className="text-xs text-gray-500 mt-2">
+          <div className="text-xs text-gray-500 mt-3">
             Stable engagement patterns
           </div>
         </div>
 
-        <div className="bg-gray-900 p-4 rounded border border-yellow-500/20">
-          <div className="text-xs text-gray-500">
+        <div className="bg-gray-900 border border-yellow-500/20 rounded p-5">
+          <div className="text-xs text-gray-500 uppercase tracking-wide">
             Medium Risk Users
           </div>
 
-          <div className="text-3xl font-semibold text-yellow-400 mt-2">
+          <div className="text-4xl font-semibold text-yellow-400 mt-3">
             {mediumRisk}
           </div>
 
-          <div className="text-xs text-gray-500 mt-2">
+          <div className="text-xs text-gray-500 mt-3">
             Engagement beginning to decline
           </div>
         </div>
 
-        <div className="bg-gray-900 p-4 rounded border border-red-500/20">
-          <div className="text-xs text-gray-500">
+        <div className="bg-gray-900 border border-red-500/20 rounded p-5">
+          <div className="text-xs text-gray-500 uppercase tracking-wide">
             High Risk Users
           </div>
 
-          <div className="text-3xl font-semibold text-red-400 mt-2">
+          <div className="text-4xl font-semibold text-red-400 mt-3">
             {highRisk}
           </div>
 
-          <div className="text-xs text-gray-500 mt-2">
+          <div className="text-xs text-gray-500 mt-3">
             Immediate intervention required
           </div>
         </div>
 
       </div>
 
-      {/* PERFORMANCE CHART */}
-      <div className="bg-gray-900 rounded p-4 border border-gray-800">
+      {/* CHART */}
+      <div className="bg-gray-900 border border-gray-800 rounded p-6">
 
-        <div className="text-sm text-gray-400 mb-4">
+        <div className="text-sm text-gray-400 mb-6">
           Activation vs Baseline
         </div>
 
-        <ResponsiveContainer width="100%" height={280}>
+        <ResponsiveContainer width="100%" height={320}>
           <LineChart data={history}>
 
             <XAxis
@@ -457,40 +469,40 @@ export default function Home() {
       </div>
 
       {/* STRATEGY MIX */}
-      <div className="bg-gray-900 rounded p-4 border border-gray-800">
+      <div className="bg-gray-900 border border-gray-800 rounded p-6">
 
-        <div className="text-sm text-gray-400 mb-4">
+        <div className="text-sm text-gray-400 mb-6">
           Strategy Mix
         </div>
 
         <div className="grid grid-cols-3 gap-4">
 
-          <div className="bg-black rounded p-4">
-            <div className="text-xs text-gray-500">
+          <div className="bg-black rounded border border-gray-800 p-5">
+            <div className="text-xs text-gray-500 uppercase tracking-wide">
               Email
             </div>
 
-            <div className="text-2xl mt-2">
+            <div className="text-3xl mt-3">
               {latest?.email || 0}
             </div>
           </div>
 
-          <div className="bg-black rounded p-4">
-            <div className="text-xs text-gray-500">
+          <div className="bg-black rounded border border-gray-800 p-5">
+            <div className="text-xs text-gray-500 uppercase tracking-wide">
               Tooltip
             </div>
 
-            <div className="text-2xl mt-2">
+            <div className="text-3xl mt-3">
               {latest?.tooltip || 0}
             </div>
           </div>
 
-          <div className="bg-black rounded p-4">
-            <div className="text-xs text-gray-500">
+          <div className="bg-black rounded border border-gray-800 p-5">
+            <div className="text-xs text-gray-500 uppercase tracking-wide">
               Incentive
             </div>
 
-            <div className="text-2xl mt-2">
+            <div className="text-3xl mt-3">
               {latest?.incentive || 0}
             </div>
           </div>
@@ -500,43 +512,43 @@ export default function Home() {
       </div>
 
       {/* LIVE FEED */}
-      <div className="bg-gray-900 rounded p-4 border border-gray-800">
+      <div className="bg-gray-900 border border-gray-800 rounded p-6">
 
-        <div className="text-sm text-gray-400 mb-4">
+        <div className="text-sm text-gray-400 mb-6">
           Live Decision Feed
         </div>
 
-        <div className="max-h-96 overflow-y-auto space-y-2">
+        <div className="max-h-[420px] overflow-y-auto space-y-3">
 
           {logs.map((log, i) => (
             <div
               key={i}
-              className="bg-black rounded p-3 flex justify-between text-sm"
+              className="bg-black border border-gray-800 rounded p-4 flex justify-between items-center"
             >
 
               <div>
-                <span className="text-gray-500">
-                  Day {log.day}
-                </span>
-
-                <span className="ml-3 font-medium">
+                <div className="text-sm font-medium">
                   {log.user}
-                </span>
+                </div>
+
+                <div className="text-xs text-gray-500 mt-1">
+                  Day {log.day}
+                </div>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex gap-6 text-sm">
 
-                <span className="text-blue-400">
+                <div className="text-blue-400">
                   {log.action}
-                </span>
+                </div>
 
-                <span className="text-green-400">
+                <div className="text-green-400">
                   {log.outcome}
-                </span>
+                </div>
 
-                <span className="text-gray-500">
+                <div className="text-gray-500">
                   {log.reason}
-                </span>
+                </div>
 
               </div>
 
