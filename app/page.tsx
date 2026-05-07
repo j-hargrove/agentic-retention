@@ -43,7 +43,7 @@ export default function Home() {
   const [running, setRunning] = useState(false)
   const [status, setStatus] = useState("idle")
 
-  const [budget, setBudget] = useState(200)
+  const [budget, setBudget] = useState(500)
   const [spent, setSpent] = useState(0)
 
   const [narrative, setNarrative] = useState("")
@@ -62,10 +62,10 @@ export default function Home() {
   }
 
   const run = () => {
-    if (spent > budget) {
-      setStatus("paused (budget exceeded)")
-      return
-    }
+    if (day >= 30) {
+  setRunning(false)
+  setStatus("simulation complete")
+  return
 
     setStatus("thinking")
 
